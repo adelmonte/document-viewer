@@ -1,0 +1,46 @@
+[package]
+name = "document-viewer"
+version = "0.1.0"
+edition = "2024"
+description = "Document viewer for PDF, DjVu, DVI, TIFF, images and comic book archives"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/adelmonte/document-viewer"
+default-run = "document-viewer"
+
+[[bin]]
+name = "document-viewer"
+path = "src/main.rs"
+
+[[bin]]
+name = "document-viewer-thumbnailer"
+path = "src/bin/thumbnailer.rs"
+
+[lib]
+name = "document_viewer"
+path = "src/lib.rs"
+
+[dependencies]
+bzip2 = "0.6"
+dirs = "6"
+djvu-rs = { version = "1.0.0-rc.1", default-features = false, features = ["std"] }
+eframe = { version = "0.37", default-features = false, features = ["glow", "wayland", "x11", "default_fonts", "clipboard"] }
+egui = "0.37"
+flate2 = "1"
+hayro = "0.9"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "tiff", "pnm", "tga", "qoi", "ico"] }
+lzma-rust2 = "0.25.0"
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal", "wayland"] }
+serde = { version = "1", features = ["derive"] }
+tar = { version = "0.4", default-features = false }
+tiff = "0.11"
+toml = "0.9"
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+zip = { version = "9", default-features = false, features = ["deflate", "deflate64", "bzip2", "lzma"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = true
+
+[dev-dependencies]
+egui_kittest = { version = "0.37", features = ["eframe"] }

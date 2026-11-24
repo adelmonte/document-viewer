@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=document-viewer-thumbnailer
+Exec=document-viewer-thumbnailer -s %s %u %o
+MimeType=application/pdf;application/x-pdf;application/x-bzpdf;application/x-gzpdf;application/x-xzpdf;image/vnd.djvu;image/vnd.djvu+multipage;image/x-djvu;application/x-dvi;image/tiff;application/vnd.comicbook+zip;application/x-cbz;application/x-cbt;

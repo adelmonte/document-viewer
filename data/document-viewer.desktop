@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=Document Viewer
+GenericName=Document Viewer
+Comment=View PDF, DjVu, DVI, TIFF, image and comic book documents
+Exec=document-viewer %U
+TryExec=document-viewer
+Icon=document-viewer
+Terminal=false
+StartupNotify=true
+StartupWMClass=document-viewer
+Categories=Graphics;Viewer;Office;
+Keywords=pdf;djvu;dvi;tiff;comic;cbz;viewer;
+MimeType=application/pdf;application/x-pdf;application/x-bzpdf;application/x-gzpdf;application/x-xzpdf;image/vnd.djvu;image/vnd.djvu+multipage;image/x-djvu;application/x-dvi;application/x-bzdvi;application/x-gzdvi;image/tiff;application/vnd.comicbook+zip;application/x-cbz;application/x-cbt;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=document-viewer
