@@ -313,7 +313,9 @@ impl Theme {
         let dark = match self.file.mode {
             Mode::Light => false,
             Mode::Dark => true,
-            Mode::System => ctx.system_theme().map(|t| t == EguiTheme::Dark).unwrap_or(true),
+            Mode::System => crate::system::prefers_dark()
+                .or_else(|| ctx.system_theme().map(|t| t == EguiTheme::Dark))
+                .unwrap_or(false),
         };
         if self.applied_dark != Some(dark) {
             self.applied_dark = Some(dark);

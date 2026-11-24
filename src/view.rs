@@ -108,6 +108,8 @@ pub struct View {
     pub current_page: usize,
     target: Option<Target>,
     anchor: Option<Anchor>,
+    /// When the zoom last changed; new renders wait until it settles.
+    zoomed_at: Option<std::time::Instant>,
     drag: Drag,
     flip_acc: f32,
 
@@ -157,6 +159,7 @@ impl View {
             current_page: 0,
             target: None,
             anchor: None,
+            zoomed_at: None,
             drag: Drag::None,
             flip_acc: 0.0,
             selection: None,
@@ -555,6 +558,7 @@ impl View {
         }
         self.sizing = Sizing::Free;
         self.zoom = zoom;
+        self.zoomed_at = Some(std::time::Instant::now());
     }
 
     pub fn zoom_in(&mut self) {
@@ -960,6 +964,11 @@ impl View {
         let mut wanted: Vec<TileKey> = Vec::new();
         let mut later: Vec<TileKey> = Vec::new();
         let paper = if self.invert { Color32::BLACK } else { Color32::WHITE };
+        const SETTLE: std::time::Duration = std::time::Duration::from_millis(140);
+        let settling = self.zoomed_at.is_some_and(|t| t.elapsed() < SETTLE);
+        if settling {
+            ctx.request_repaint_after(SETTLE);
+        }
 
         for &p in &visible {
             let pr = self.page_rect(p);
@@ -977,7 +986,8 @@ impl View {
                 if self.touch(&pk).is_none() {
                     wanted.push(pk);
                 }
-                for t in self.tiles_for(p, ds, rect) {
+                let tiles = if settling { Vec::new() } else { self.tiles_for(p, ds, rect) };
+                for t in tiles {
                     if let Some(tex) = self.touch(&t) {
                         let r = RectF::new(t.x as f32 / ds, t.y as f32 / ds, (t.x + t.w) as f32 / ds, (t.y + t.h) as f32 / ds);
                         self.paint_texture(&painter, p, tex, r, Color32::WHITE);
@@ -992,8 +1002,12 @@ impl View {
                 } else {
                     if let Some((tex, _)) = self.fallback(p) {
                         self.paint_texture(&painter, p, tex, full, Color32::WHITE);
+                    } else if settling {
+                        wanted.push(key);
                     }
-                    wanted.push(key);
+                    if !settling {
+                        wanted.push(key);
+                    }
                 }
             }
             painter.rect_stroke(pr, 0.0, Stroke::new(1.0, colors.page_border), egui::StrokeKind::Outside);
@@ -1001,7 +1015,9 @@ impl View {
         }
 
         // Prefetch the neighbors of the visible range.
-        if let (Some(&first), Some(&last)) = (visible.first(), visible.last()) {
+        if !settling
+            && let (Some(&first), Some(&last)) = (visible.first(), visible.last())
+        {
             for p in [last + 1, last + 2, first.wrapping_sub(1)] {
                 if p < self.page_count() && self.layout.rects[p].is_positive() {
                     let s = if self.needs_tiles(p, ds) {

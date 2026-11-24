@@ -1,6 +1,6 @@
 [package]
 name = "document-viewer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Document viewer for PDF, DjVu, DVI, TIFF, images and comic book archives"
 license = "GPL-3.0-or-later"
@@ -29,11 +29,15 @@ flate2 = "1"
 hayro = "0.9"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "tiff", "pnm", "tga", "qoi", "ico"] }
 lzma-rust2 = "0.25.0"
+raw-window-handle = "0.6"
 rfd = { version = "0.17", default-features = false, features = ["xdg-portal", "wayland"] }
 serde = { version = "1", features = ["derive"] }
 tar = { version = "0.4", default-features = false }
 tiff = "0.11"
 toml = "0.9"
+wayland-backend = { version = "0.3", features = ["client_system"] }
+wayland-client = "0.31"
+wayland-protocols = { version = "0.32", features = ["client", "unstable"] }
 zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
 zip = { version = "9", default-features = false, features = ["deflate", "deflate64", "bzip2", "lzma"] }
 

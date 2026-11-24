@@ -131,6 +131,9 @@ pub struct App {
     startup: Option<Startup>,
     window: (f32, f32, bool),
     recent: Vec<PathBuf>,
+    pinch: Option<Receiver<f32>>,
+    /// Jump to the first match as soon as the running search finds one.
+    find_jump: bool,
 }
 
 fn file_name(p: &Path) -> String {
@@ -198,6 +201,7 @@ impl App {
         ctx.options_mut(|o| {
             o.zoom_with_keyboard = false;
         });
+        crate::system::watch(ctx.clone());
         let settings = Settings::load();
         let mut theme = Theme::load();
         theme.update(ctx);
@@ -228,6 +232,8 @@ impl App {
             last_mtime_check: Instant::now(),
             startup: None,
             recent: DocStore::load().recent(12),
+            pinch: crate::gestures::start(cc),
+            find_jump: false,
         };
         if let Some(f) = &startup.file {
             app.open(ctx, f.clone(), None, None);
@@ -523,6 +529,8 @@ impl App {
                 }
                 if self.find_changed.is_some() {
                     self.start_search(ctx);
+                    self.find_jump = true;
+                    return;
                 }
                 if let Some(d) = &mut self.doc {
                     let page = d.view.current_page;
@@ -1500,11 +1508,34 @@ impl eframe::App for App {
         if self.dialog.is_none() {
             cmds.extend(self.keyboard(&ctx));
         }
+        if self.find_jump {
+            match self.doc.as_ref().and_then(|d| d.view.search.as_ref()) {
+                Some(s) if s.current.is_some() => self.find_jump = false,
+                Some(s) if s.total() > 0 => {
+                    self.find_jump = false;
+                    cmds.push(Cmd::FindNext);
+                }
+                Some(s) if !s.finished() => {}
+                _ => self.find_jump = false,
+            }
+        }
+        if let Some(rx) = &self.pinch {
+            let factor: f32 = rx.try_iter().product();
+            if factor != 1.0
+                && !self.presentation
+                && self.dialog.is_none()
+                && let Some(d) = &mut self.doc
+            {
+                let pointer = ctx.input(|i| i.pointer.hover_pos());
+                let z = d.view.effective_zoom() * factor;
+                d.view.set_zoom(z, pointer);
+            }
+        }
         if let Some(t) = self.find_changed
             && t.elapsed().as_millis() > 250
         {
             self.start_search(&ctx);
-            cmds.push(Cmd::FindNext);
+            self.find_jump = true;
         } else if self.find_changed.is_some() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
         }

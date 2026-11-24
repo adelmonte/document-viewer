@@ -35,7 +35,17 @@ fn wait_for(h: &mut Harness<'static, App>, what: &str, cond: impl Fn(&Harness<'s
         }
         std::thread::sleep(Duration::from_millis(10));
     }
-    panic!("timed out waiting for {what}");
+    let labels: Vec<String> = h
+        .root()
+        .children_recursive()
+        .filter_map(|n| {
+            let a = n.accesskit_node();
+            let l = a.label().map(|l| l.to_string()).unwrap_or_default();
+            let v = a.value().map(|v| format!(" = {v:?}")).unwrap_or_default();
+            (!l.is_empty() || !v.is_empty()).then(|| format!("{:?} {l}{v}", a.role()))
+        })
+        .collect();
+    panic!("timed out waiting for {what}; on screen:\n{}", labels.join("\n"));
 }
 
 #[test]
