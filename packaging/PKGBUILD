@@ -12,7 +12,7 @@ optdepends=('texlive-binextra: kpsewhich, to find fonts for DVI files'
             'cups: printing without the portal (lp)')
 makedepends=('cargo')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('dfff642b8bd857a9beff6a3a86d18e8d58edb59d3b7766f84f38bc206da23e76')
 options=('!lto')
 
 prepare() {
