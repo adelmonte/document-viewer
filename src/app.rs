@@ -132,6 +132,8 @@ pub struct App {
     window: (f32, f32, bool),
     recent: Vec<PathBuf>,
     pinch: Option<Receiver<f32>>,
+    /// Files dropped on the window; `None` if the compositor has no data devices.
+    drops: Option<crate::wayland_dnd::Drops>,
     /// Jump to the first match as soon as the running search finds one.
     find_jump: bool,
 }
@@ -198,6 +200,7 @@ fn paper_name(w_mm: f32, h_mm: f32) -> Option<&'static str> {
 impl App {
     pub fn new(cc: &eframe::CreationContext<'_>, startup: Startup) -> App {
         let ctx = &cc.egui_ctx;
+        ctx.add_plugin(crate::wlclip::Plugin::default());
         ctx.options_mut(|o| {
             o.zoom_with_keyboard = false;
         });
@@ -233,6 +236,7 @@ impl App {
             startup: None,
             recent: DocStore::load().recent(12),
             pinch: crate::gestures::start(cc),
+            drops: crate::wayland_dnd::start(cc),
             find_jump: false,
         };
         if let Some(f) = &startup.file {
@@ -1365,7 +1369,7 @@ impl App {
         rows
     }
 
-    fn poll_background(&mut self, ctx: &egui::Context, cmds: &mut Vec<Cmd>) {
+    fn poll_background(&mut self, cmds: &mut Vec<Cmd>) {
         if let Some(rx) = &self.file_rx
             && let Ok(r) = rx.try_recv()
         {
@@ -1394,7 +1398,7 @@ impl App {
                 Err(e) => self.dialog = Some(Dialog::Error(format!("Printing failed\n\n{e}"))),
             }
         }
-        let dropped: Vec<PathBuf> = ctx.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).filter(|p| !p.as_os_str().is_empty()).collect());
+        let dropped: Vec<PathBuf> = self.drops.as_ref().map(|d| d.take()).unwrap_or_default();
         for (i, p) in dropped.into_iter().enumerate() {
             if i == 0 {
                 cmds.push(Cmd::OpenPath(p));
@@ -1504,7 +1508,7 @@ impl eframe::App for App {
         self.poll_loading(&ctx);
         self.check_file_changed(&ctx);
         let mut cmds = Vec::new();
-        self.poll_background(&ctx, &mut cmds);
+        self.poll_background(&mut cmds);
         if self.dialog.is_none() {
             cmds.extend(self.keyboard(&ctx));
         }
@@ -1673,6 +1677,9 @@ impl eframe::App for App {
     }
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if let Some(drops) = &self.drops {
+            drops.stop();
+        }
         self.save_doc_state();
         let (w, h, max) = self.window;
         self.settings.window_width = w;

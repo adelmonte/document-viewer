@@ -23,11 +23,12 @@ path = "src/lib.rs"
 bzip2 = "0.6"
 dirs = "6"
 djvu-rs = { version = "1.0.0-rc.1", default-features = false, features = ["std"] }
-eframe = { version = "0.37", default-features = false, features = ["glow", "wayland", "default_fonts", "clipboard"] }
+eframe = { version = "0.37", default-features = false, features = ["glow", "wayland", "default_fonts"] }
 egui = "0.37"
 flate2 = "1"
 hayro = "0.9"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "tiff", "pnm", "tga", "qoi", "ico"] }
+libc = "0.2"
 lzma-rust2 = "0.25.0"
 raw-window-handle = "0.6"
 rfd = { version = "0.17", default-features = false, features = ["xdg-portal", "wayland"] }
@@ -38,6 +39,8 @@ toml = "0.9"
 wayland-backend = { version = "0.3", features = ["client_system"] }
 wayland-client = "0.31"
 wayland-protocols = { version = "0.32", features = ["client", "unstable"] }
+# The clipboard (eframe's own would bring in X11).
+wl-clipboard-rs = "0.9"
 zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
 zip = { version = "9", default-features = false, features = ["deflate", "deflate64", "bzip2", "lzma"] }
 

@@ -10,3 +10,5 @@ pub mod sidebar;
 pub mod system;
 pub mod theme;
 pub mod view;
+pub mod wayland_dnd;
+pub mod wlclip;
