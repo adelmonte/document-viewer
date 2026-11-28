@@ -1,6 +1,6 @@
 # Maintainer: adelmonte
 pkgname=document-viewer
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc='Document viewer for PDF, DjVu, DVI, TIFF, images and comic books, written in pure Rust'
 arch=('x86_64')
@@ -12,7 +12,7 @@ optdepends=('texlive-binextra: kpsewhich, to find fonts for DVI files'
             'cups: printing without the portal (lp)')
 makedepends=('cargo')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('25d23d660f40d22dd7479582b476ec18d6abcaf6f82a37d318800d1c6d6972e9')
+sha256sums=('dd69bf004770199392f3867c16472b32cb3e59aa4ef22558e52704820637fb25')
 options=('!lto')
 
 prepare() {
