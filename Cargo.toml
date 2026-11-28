@@ -23,7 +23,7 @@ path = "src/lib.rs"
 bzip2 = "0.6"
 dirs = "6"
 djvu-rs = { version = "1.0.0-rc.1", default-features = false, features = ["std"] }
-eframe = { version = "0.37", default-features = false, features = ["glow", "wayland", "x11", "default_fonts", "clipboard"] }
+eframe = { version = "0.37", default-features = false, features = ["glow", "wayland", "default_fonts", "clipboard"] }
 egui = "0.37"
 flate2 = "1"
 hayro = "0.9"
